@@ -181,20 +181,15 @@ def check_backend_ready(backend: str, base_url: str, model: str, timeout_seconds
 
     timeout = min(max(timeout_seconds, 5), 30)
     try:
-        if backend == "ollama":
-            resp = requests.get(f"{base_url.rstrip('/')}/api/tags", timeout=timeout)
-            resp.raise_for_status()
-            data = resp.json()
-            models = [m.get("name", "") for m in data.get("models", []) if isinstance(m, dict)]
-            if model not in models:
-                return False, f"Ollama is running, but model '{model}' is not found. Run: ollama pull {model}"
-            return True, f"Connected to Ollama. Model ready: {model}"
-
-        resp = requests.get(f"{base_url.rstrip('/')}/models", timeout=timeout)
+        resp = requests.get(f"{base_url.rstrip('/')}/api/tags", timeout=timeout)
         resp.raise_for_status()
-        return True, "Connected to LM Studio server."
+        data = resp.json()
+        models = [m.get("name", "") for m in data.get("models", []) if isinstance(m, dict)]
+        if model not in models:
+            return False, f"Ollama is running, but model '{model}' is not found. Run: ollama pull {model}"
+        return True, f"Connected to Ollama. Model ready: {model}"
     except Exception as exc:
-        return False, f"Cannot connect to {backend} at {base_url}. {exc}"
+        return False, f"Cannot connect to Ollama at {base_url}. {exc}"
 
 
 def render_bullet_list(items, empty_msg="- None listed."):
@@ -341,7 +336,8 @@ init_state()
 
 with st.sidebar:
     st.markdown("## Backend Settings")
-    backend = st.selectbox("Provider", ["lmstudio", "ollama"], index=1)
+    backend = "ollama"
+    st.selectbox("Provider", ["ollama"], index=0, disabled=True)
     defaults = default_for_backend(backend)
 
     base_url = st.text_input("Base URL", value=defaults.base_url)
@@ -405,7 +401,7 @@ if run:
             st.session_state.followup_chat_history = []
         except Exception as exc:
             st.error(
-                "Failed to run local backend. Ensure LM Studio or Ollama server is running and base URL/model are correct."
+                "Failed to run local backend. Ensure Ollama is running and base URL/model are correct."
             )
             st.exception(exc)
 

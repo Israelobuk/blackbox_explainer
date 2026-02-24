@@ -4,9 +4,9 @@ import os
 
 @dataclass
 class AppConfig:
-    backend: str = "lmstudio"
-    model: str = "qwen2.5-7b-instruct"
-    base_url: str = "http://localhost:1234/v1"
+    backend: str = "ollama"
+    model: str = "llama3.1:8b"
+    base_url: str = "http://localhost:11434"
     temperature: float = 0.2
     max_tokens: int = 700
     timeout_seconds: int = 120
@@ -14,21 +14,10 @@ class AppConfig:
 
 
 def default_for_backend(backend: str) -> AppConfig:
-    b = (backend or "").strip().lower()
-    if b == "ollama":
-        return AppConfig(
-            backend="ollama",
-            model="llama3.1:8b",
-            base_url="http://localhost:11434",
-            temperature=0.2,
-            max_tokens=700,
-            timeout_seconds=120,
-            critique_pass=False,
-        )
     return AppConfig(
-        backend="lmstudio",
-        model="qwen2.5-7b-instruct",
-        base_url="http://localhost:1234/v1",
+        backend="ollama",
+        model="llama3.1:8b",
+        base_url="http://localhost:11434",
         temperature=0.2,
         max_tokens=700,
         timeout_seconds=120,
@@ -37,7 +26,7 @@ def default_for_backend(backend: str) -> AppConfig:
 
 
 def load_from_env() -> AppConfig:
-    backend = os.getenv("BBE_BACKEND", "lmstudio").strip().lower()
+    backend = os.getenv("BBE_BACKEND", "ollama").strip().lower()
     cfg = default_for_backend(backend)
 
     cfg.model = os.getenv("BBE_MODEL", cfg.model)
